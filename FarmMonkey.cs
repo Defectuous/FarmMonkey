@@ -6,51 +6,89 @@ using System.Collections.Generic;
 using System.Linq;
 using ArcheBuddy.Bot.Classes;
 
-namespace FarmMonkey{
-   public class FarmMonkey : Core
+//
+// Special Thanks for a really 
+//
+//
+//
+//
+
+namespace DefaultNameSpace{
+   public class DefaultClass : Core
    {
        public static string GetPluginAuthor()
        { return "Defectuous"; }
        public static string GetPluginVersion()
        { return "1.0.0.0"; }
        public static string GetPluginDescription()
-       { return "Farm Monkey: Archeage Archbuddy Farming Plugin"; }
-       // Special Thanks to the following Archbuddy Forum members
-       // AtomicBomb, Voyager92,
+       { return "FarmMonkey: Continuous Multi Farm Harvest & Planting Plugin"; }
+
+       // Start Universal Config
+       uint[] farms = {12345, 54321};
+       int _minlabor   = 200;
+       string _seed    = "Rice Seed";
+       string _plant   = "Rice"; // Make sure seed is Mature type or not. 
+       string _gpsfile = "\\Plugins\\FarmMonkey\\file.db3"; // Location of GPS File
+       
+       
+       // End Universal Config ( Do Not Edit anything past this line )
+       // Universal Application Information
+       int _labor     = me.laborPoints;
+       // string _myname = me.name; 
        
        //Call on plugin start
        public void PluginRun()
-       {
+        {
+            ClearLogs();
+            Log("FarmMonkey: Plugin Started");
+            while (true) {    
+                if (gameState == GameState.Ingame){
+                    Log("We are in game and ready to Farm");
+                    // Time to Harvest plants
+                    Harvesting();
+                    // Lets fill that field
+                    PLanting();
+                  else {
+                  Log("We are not in game yet") ;
+                 }
+                }
+            }
+        }
         
-       // Get Family & Guild Names
-       
-       // Inventory ( Seeds, Animals, Saplings, Feed, Repair Materials )
-       
-       // Configuration ( Done Through GUI )
-	   
-	   // Check GPS & Move to Farm Location(s)
-	   
-	   // Collect & Verify Farm ID's ( Priority Family and Guild Farms )
-	   
-	   // Harvest ( Plants, Harvest Fruit Tree's )
-       
-       // Chop Non Fruit Tree's
-       
-       // Repair Pens & Coops
-       
-       // Manage Animals (Feed or Medicate, then Feed, Harvest, or Slaughter)
-       
-       // Plant Seeds & Tree's, Set Animals. ( Plant in Quadrants )
-	   // Move to Last planted seed 5 meters distance
-       
-       // AFK Manager ( Random Timer & Random action such as jump, turn, side step, log off on timer )
-	   // 
-       
-       
-       }
+  
+        public void MoveFromSafe()
+        {
+        
+        }
+        
+        public void MoveToSafe()
+        {
+        
+        }
+        public void Harvesting()
+        {
+            foreach (uint farm in _farms){
+                Log("Harvesting: "+farm);
+                if _labor >= _minlabor;
+                CollectItemsAtFarm(plant, "Gathering: Spend 1 Labor to gather materials.", farm);
+                CollectItemsAtFarm(plant, "Farming: Spend 1 Labor to harvest crops.", farm);
+                } else {
+                    Log("Your labor is low");
+                    Log("Labor:" + _labor);
+                }
+        }
+        
+        public void PLanting()
+        {
+            foreach (uint farm in _farms){
+                Log("Planting: "+farm);
+                PlantItemsAtFarm(seed, farm);
+                }
+        }
        //Call on plugin stop
        public void PluginStop()
-       {
-       }
-   }
+        {
+            
+        }
+    }
 }
