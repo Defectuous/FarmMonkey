@@ -24,7 +24,7 @@ namespace DefaultNameSpace{
        { return "FarmMonkey: Continuous Multi Farm Harvest & Planting Plugin"; }
 
        // Start Universal Config
-       uint[] farms = {12345, 54321};
+       uint[] _farms = {12345, 54321};
        int _minlabor   = 200;
        string _seed    = "Rice Seed";
        string _plant   = "Rice"; // Make sure seed is Mature type or not. 
@@ -44,10 +44,12 @@ namespace DefaultNameSpace{
             while (true) {    
                 if (gameState == GameState.Ingame){
                     Log("We are in game and ready to Farm");
+                    //MoveFromSafe();
                     // Time to Harvest plants
                     Harvesting();
                     // Lets fill that field
                     PLanting();
+                    //MovetoSafe();
                   else {
                   Log("We are not in game yet") ;
                  }
@@ -56,15 +58,16 @@ namespace DefaultNameSpace{
         }
         
   
-        public void MoveFromSafe()
-        {
+        //public void MoveFromSafe()
+        //{
         
-        }
+        //}
         
-        public void MoveToSafe()
-        {
+        //public void MoveToSafe()
+        //{
+            
+        //}
         
-        }
         public void Harvesting()
         {
             foreach (uint farm in _farms){
