@@ -12,7 +12,7 @@ using ArcheBuddy.Bot.Classes;
 //
 //
 
-namespace FarmMonkeyBeta
+namespace ArcheAgeFarmMonkey
 {
     public class FarmMonkey : Core
     {
@@ -26,7 +26,7 @@ namespace FarmMonkeyBeta
         // START Universal Config
         
         uint[] _farms = { 16790 }; // Gather Farm ID's wtih scarecrow { 12345, 54321 }
-        int _minlabor = 200;
+        int _minlabor = 200;  // Minimum Labor for harvesting.
         string _seed  = "Potato Eyes";
         string _plant = "Potato"; // Make sure plant is Mature type or not. 
 
@@ -34,33 +34,26 @@ namespace FarmMonkeyBeta
         string _gather  = "Gathering: Spend 1 Labor to gather materials.";
         string _harvest = "Farming: Spend 1 Labor to harvest crops.";
 
-        // Note: You may need to change the file.db3 name here
-        // GPS Info, you need to make two points " Farm " & " Safe "
-        //string _gpsfile = "\\Plugins\\FarmMonkey\\Path\\file.db3"; // Location of GPS File
-
-        
         // END Universal Config 
         // ( Do Not Edit anything past this line unless you are confident you know what your doing )
         
         // Universal Application Information
-        //private Gps gps;
 
+        
         //Call on plugin start
         public void PluginRun()
         {
             ClearLogs();
             Log(Time() + "FarmMonkey: Plugin Started");
+            
             while (true) {
                 if (gameState == GameState.Ingame){
                     Log(Time() + "We are in game and ready to Farm");
-                    //MoveFromSafe();
                     // Time to Harvest plants
                     Harvesting();
                     // Lets fill that field
                     Planting();
-                    //FarmCheckTime(); // Check time so we can come back and harvest when it's ready
-                    //MoveToSafe();
-                    
+
                     //  Temporary Sleep to prevent to many checks
                     Random random = new Random();
                     var mseconds  = random.Next(240, 300) * 1000;
@@ -71,46 +64,29 @@ namespace FarmMonkeyBeta
                 }
             }
         }
-
-        // Move From Safe Location
-        //public void MoveFromSafe()
-        //{
-        //    gps.LoadDataBase(Application.StartupPath + _gpsfile);
-        //    gps.GpsMove("Farm");
-        //}
-
-        // Move Back to Safe Location ( Possibley sit on nearest chair or bed )
-        //public void MoveToSafe()
-        //{
-        //    gps.LoadDataBase(Application.StartupPath + _gpsfile);
-        //    gps.GpsMove("Safe");
-        //}
-        
-        //public void FarmCheckTime()
-        //{
-            // ( check latest dodad by me.name & last time )
-        //}
         
         public void Harvesting()
         {
-            foreach (uint farm in _farms){
-                Log(Time() + "Harvesting on FarmID: "+farm);
-                if (me.laborPoints >= _minlabor)
-                CollectItemsAtFarm(_plant, _gather, farm);
-                CollectItemsAtFarm(_plant, _harvest, farm);
-                } 
+            var _labor = me.laborPoints;
+            if (_labor > _minlabor){
+                Log("Current Labor:" + _labor);
+                foreach (uint farm in _farms){
+                    Log(Time() + "Harvesting " + _plant + "(s) on FarmID: "+farm);
+                    CollectItemsAtFarm(_plant, _gather, farm);
+                    CollectItemsAtFarm(_plant, _harvest, farm);
+                    } 
+            }
         }
 
         public void Planting()
         {
             var seedcount = itemCount(_seed);
             if ( seedcount == 0){
-            Log(Time() + "You have no seeds Stopping Plugin!");
-            PluginStop();
+            Log(Time() + "You have no seeds!");
             } else{
                 foreach (uint farm in _farms)
                 {
-                    Log(Time() +  "Planting" + _seed + "on FarmID: " + farm);
+                    Log(Time() +  "Planting" + _seed + "(s) on FarmID: " + farm);
                     PlantItemsAtFarm(_seed, farm);
                 }
             }
@@ -121,6 +97,7 @@ namespace FarmMonkeyBeta
             string A = DateTime.Now.ToString("[hh:mm:ss] ");
             return A;
         }
+        
         //Call on plugin stop
         public void PluginStop()
         {
