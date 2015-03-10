@@ -1,4 +1,3 @@
-
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -26,7 +25,7 @@ namespace FarmMonkeyBeta
         
         // START Universal Config
         
-        uint[] _farms = { 12345 }; // Gather Farm ID's wtih scarecrow { 12345, 54321 }
+        uint[] _farms = { 16790 }; // Gather Farm ID's wtih scarecrow { 12345, 54321 }
         int _minlabor = 200;
         string _seed  = "Potato Eyes";
         string _plant = "Potato"; // Make sure plant is Mature type or not. 
@@ -34,11 +33,17 @@ namespace FarmMonkeyBeta
         // Note: You may need to update the Amount of labor needed for Gathering & Harvesting.
         string _gather  = "Gathering: Spend 1 Labor to gather materials.";
         string _harvest = "Farming: Spend 1 Labor to harvest crops.";
+
+        // Note: You may need to change the file.db3 name here
+        // GPS Info, you need to make two points " Farm " & " Safe "
+        //string _gpsfile = "\\Plugins\\FarmMonkey\\Path\\file.db3"; // Location of GPS File
+
         
         // END Universal Config 
         // ( Do Not Edit anything past this line unless you are confident you know what your doing )
         
         // Universal Application Information
+        //private Gps gps;
 
         //Call on plugin start
         public void PluginRun()
@@ -48,11 +53,14 @@ namespace FarmMonkeyBeta
             while (true) {
                 if (gameState == GameState.Ingame){
                     Log(Time() + "We are in game and ready to Farm");
+                    //MoveFromSafe();
                     // Time to Harvest plants
                     Harvesting();
                     // Lets fill that field
                     Planting();
-                                        
+                    //FarmCheckTime(); // Check time so we can come back and harvest when it's ready
+                    //MoveToSafe();
+                    
                     //  Temporary Sleep to prevent to many checks
                     Random random = new Random();
                     var mseconds  = random.Next(240, 300) * 1000;
@@ -63,7 +71,26 @@ namespace FarmMonkeyBeta
                 }
             }
         }
-     
+
+        // Move From Safe Location
+        //public void MoveFromSafe()
+        //{
+        //    gps.LoadDataBase(Application.StartupPath + _gpsfile);
+        //    gps.GpsMove("Farm");
+        //}
+
+        // Move Back to Safe Location ( Possibley sit on nearest chair or bed )
+        //public void MoveToSafe()
+        //{
+        //    gps.LoadDataBase(Application.StartupPath + _gpsfile);
+        //    gps.GpsMove("Safe");
+        //}
+        
+        //public void FarmCheckTime()
+        //{
+            // ( check latest dodad by me.name & last time )
+        //}
+        
         public void Harvesting()
         {
             foreach (uint farm in _farms){
@@ -83,7 +110,7 @@ namespace FarmMonkeyBeta
             } else{
                 foreach (uint farm in _farms)
                 {
-                    Log(Time() +  "Planting on FarmID: " + farm);
+                    Log(Time() +  "Planting" + _seed + "on FarmID: " + farm);
                     PlantItemsAtFarm(_seed, farm);
                 }
             }
