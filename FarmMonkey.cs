@@ -58,7 +58,7 @@ namespace ArcheAgeFarmMonkey
                     Random random = new Random();
                     var mseconds  = random.Next(240, 300) * 1000;
                     var seconds   = mseconds / 1000;
-                    Log(Time() +  "Waiting for " + seconds.ToString() + " seconds");
+                    Log(Time() +  "Waiting " + seconds.ToString() + " seconds to check seeds");
                     Thread.Sleep(mseconds);
 
                 }
@@ -82,14 +82,16 @@ namespace ArcheAgeFarmMonkey
         {
             var seedcount = itemCount(_seed);
             if ( seedcount == 0){
-            Log(Time() + "You have no seeds!");
-            } else{
-                foreach (uint farm in _farms)
-                {
-                    Log(Time() +  "Planting" + _seed + "(s) on FarmID: " + farm);
-                    PlantItemsAtFarm(_seed, farm);
+                Log(Time() + "Seed Count:" + seedcount + _seed);
+                Log(Time() + "You have no seeds!");
+                } else{
+                    foreach (uint farm in _farms)
+                    {
+                        Log(Time() + "Seed Count:" + seedcount + _seed);
+                        Log(Time() +  "Planting" + _seed + "(s) on FarmID: " + farm);
+                        PlantItemsAtFarm(_seed, farm);
+                    }
                 }
-            }
         }
         
         public string Time() //- Get Time
