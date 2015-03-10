@@ -71,7 +71,7 @@ namespace ArcheAgeFarmMonkey
             if (_labor > _minlabor){
                 Log("Current Labor:" + _labor);
                 foreach (uint farm in _farms){
-                    Log(Time() + "Harvesting " + _plant + "(s) on FarmID: "+farm);
+                    Log(Time() + "Harvesting " + _plant + "(s) on FarmID: " + farm);
                     CollectItemsAtFarm(_plant, _gather, farm);
                     CollectItemsAtFarm(_plant, _harvest, farm);
                     } 
