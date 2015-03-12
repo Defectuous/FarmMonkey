@@ -10,7 +10,6 @@ using ArcheBuddy.Bot.Classes;
 // Special Thanks to Voyager92 for a really Epic Non-Stop Farm/Gathering Base from which I am building this on. 
 // Thread:  [Plugin] Non-Stop Farm/Gathering for multiple toons/farms and with restart support
 //
-//
 
 namespace ArcheAgeFarmMonkey
 {
@@ -19,26 +18,32 @@ namespace ArcheAgeFarmMonkey
         public static string GetPluginAuthor()
         { return "Defectuous"; }
         public static string GetPluginVersion()
-        { return "1.0.0.0"; }
+        { return "1.1.3.0"; }
         public static string GetPluginDescription()
         { return "FarmMonkey: Continuous Multi Farm Harvest & Planting Plugin"; }
         
         // START Universal Config
         
-        uint[] _farms = { 16790 }; // Gather Farm ID's wtih scarecrow { 12345, 54321 }
+        uint[] _farms = { 12345, 54321 }; // Gather Farm ID's wtih scarecrow { 12345, 54321 }
         int _minlabor = 200;  // Minimum Labor for harvesting.
-        string _seed  = "Potato Eyes";
-        string _plant = "Potato"; // Make sure plant is Mature type or not. 
-
+        string _seed  = "Barley Seed";
+        string _plant = "Barley"; // Make sure plant ends up Mature or not. 
+        
         // Note: You may need to update the Amount of labor needed for Gathering & Harvesting.
         string _gather  = "Gathering: Spend 1 Labor to gather materials.";
         string _harvest = "Farming: Spend 1 Labor to harvest crops.";
-
+        
+        // This gps file needs 2 points " Safe " & " Farm "
+        string _gpsfile = "\\plugins\\FarmMonkey\\Path\\file.db3";
+        
+        // Set to true if you have a gps file for moveing to and from the safe.
+        private bool _enablegps = true; 
+        
         // END Universal Config 
         // ( Do Not Edit anything past this line unless you are confident you know what your doing )
         
         // Universal Application Information
-
+        private Gps gps;
         
         //Call on plugin start
         public void PluginRun()
@@ -49,11 +54,18 @@ namespace ArcheAgeFarmMonkey
             while (true) {
                 if (gameState == GameState.Ingame){
                     Log(Time() + "We are in game and ready to Farm");
+                    // Lets get back to the Farms
+                    if ( _enablegps == true){ MoveToFarm(); }
+                    
                     // Time to Harvest plants
                     Harvesting();
-                    // Lets fill that field
+                    // Lets fill that field with seeds
                     Planting();
-
+                    
+                    // Time to head back to the safe spot
+                    if ( _enablegps == true){ MoveToSafe(); }
+                    
+                    
                     //  Temporary Sleep to prevent to many checks
                     Random random = new Random();
                     var mseconds  = random.Next(240, 300) * 1000;
@@ -64,6 +76,20 @@ namespace ArcheAgeFarmMonkey
                 }
             }
         }
+
+        public void MoveToFarm()        
+        {         
+           gps = new Gps(this); 
+           gps.LoadDataBase(Application.StartupPath + _gpsfile); 
+           gps.GpsMove("Farm");                
+         }
+        
+       public void MoveToSafe()        
+        {         
+           gps = new Gps(this); 
+           gps.LoadDataBase(Application.StartupPath + _gpsfile); 
+           gps.GpsMove("Safe");                
+         }
         
         public void Harvesting()
         {
@@ -87,7 +113,7 @@ namespace ArcheAgeFarmMonkey
                 } else{
                     foreach (uint farm in _farms)
                     {
-                        Log(Time() + "Seed Count:" + seedcount + _seed);
+                        Log(Time() + "Seed Count: " + seedcount + _seed);
                         Log(Time() +  "Planting" + _seed + "(s) on FarmID: " + farm);
                         PlantItemsAtFarm(_seed, farm);
                     }
