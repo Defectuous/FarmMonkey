@@ -1,4 +1,4 @@
-using System;
+                    using System;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Threading;
@@ -18,13 +18,12 @@ namespace ArcheAgeFarmMonkey
         public static string GetPluginAuthor()
         { return "Defectuous"; }
         public static string GetPluginVersion()
-        { return "1.1.3.0"; }
+        { return "1.1.7.0"; }
         public static string GetPluginDescription()
         { return "FarmMonkey: Continuous Multi Farm Harvest & Planting Plugin"; }
         
         // START Universal Config
-        
-        uint[] _farms = { 12345, 54321 }; // Gather Farm ID's wtih scarecrow { 12345, 54321 }
+        uint[] _farms = { 15346, 15352 }; // Gather Farm ID's wtih scarecrow { 12345, 54321 }
         int _minlabor = 200;  // Minimum Labor for harvesting.
         string _seed  = "Barley Seed";
         string _plant = "Barley"; // Make sure plant ends up Mature or not. 
@@ -37,7 +36,9 @@ namespace ArcheAgeFarmMonkey
         string _gpsfile = "\\plugins\\FarmMonkey\\Path\\file.db3";
         
         // Set to true if you have a gps file for moveing to and from the safe.
-        private bool _enablegps = false; 
+        private bool _enablegps = false; // Enable use of gps so you can move to safe zone
+        private bool _enabledeathgps = false;  // Enable Death run set to true and make a gps path from the nui
+        private bool _enabledoorcheck = false;  // if your safe zone has a door set to true and a gps point called " Door "
         
         // END Universal Config 
         // ( Do Not Edit anything past this line unless you are confident you know what your doing )
@@ -54,6 +55,16 @@ namespace ArcheAgeFarmMonkey
             while (true) {
                 if (gameState == GameState.Ingame){
                     Log(Time() + "We are in game and ready to Farm");
+                    // Am I dead ?
+                    if (_enabledeathgps == true && me.isAlive(false))
+                    { if ( _enablegps == true){ DeathRun();
+                        Log("Damn we died, running back to safe");
+                        } else{
+                            Log("You need GPS enabled for DeathRun to work");
+                            PluginStop();
+                            }
+                    }
+                    
                     // Lets get back to the Farms
                     if ( _enablegps == true){ MoveToFarm(); }
                     
@@ -65,18 +76,24 @@ namespace ArcheAgeFarmMonkey
                     // Time to head back to the safe spot
                     if ( _enablegps == true){ MoveToSafe(); }
                     
-                    
                     //  Temporary Sleep to prevent to many checks
                     Random random = new Random();
                     var mseconds  = random.Next(240, 300) * 1000;
                     var seconds   = mseconds / 1000;
-                    Log(Time() +  "Waiting " + seconds.ToString() + " seconds to check seeds");
+                    Log(Time() +  "Waiting " + seconds.ToString() + " seconds to check plants");
                     Thread.Sleep(mseconds);
 
                 }
             }
         }
 
+        public void DeathRun()
+        {
+           gps = new Gps(this); 
+           gps.LoadDataBase(Application.StartupPath + _gpsfile); 
+           gps.GpsMove("Safe");                 
+        }
+       
         public void MoveToFarm()        
         {         
            gps = new Gps(this); 
@@ -108,7 +125,7 @@ namespace ArcheAgeFarmMonkey
         {
             var seedcount = itemCount(_seed);
             if ( seedcount == 0){
-                Log(Time() + "Seed Count:" + seedcount + _seed);
+                Log(Time() + "Seed Count:" + seedcount);
                 Log(Time() + "You have no seeds!");
                 } else{
                     foreach (uint farm in _farms)
