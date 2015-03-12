@@ -37,7 +37,7 @@ namespace ArcheAgeFarmMonkey
         string _gpsfile = "\\plugins\\FarmMonkey\\Path\\file.db3";
         
         // Set to true if you have a gps file for moveing to and from the safe.
-        private bool _enablegps = true; 
+        private bool _enablegps = false; 
         
         // END Universal Config 
         // ( Do Not Edit anything past this line unless you are confident you know what your doing )
