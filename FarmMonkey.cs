@@ -1,4 +1,4 @@
-using System;
+       using System;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Threading;
@@ -18,16 +18,16 @@ namespace ArcheAgeFarmMonkey
         public static string GetPluginAuthor()
         { return "Defectuous"; }
         public static string GetPluginVersion()
-        { return "1.1.3.0"; }
+        { return "1.1.9.4"; }
         public static string GetPluginDescription()
         { return "FarmMonkey: Continuous Multi Farm Harvest & Planting Plugin"; }
         
         // START Universal Config
         
         uint[] _farms = { 12345, 54321 }; // Gather Farm ID's wtih scarecrow { 12345, 54321 }
-        int _minlabor = 200;  // Minimum Labor for harvesting.
-        string _seed  = "Barley Seed";
-        string _plant = "Barley"; // Make sure plant ends up Mature or not. 
+        int _minlabor = 20;  // Minimum Labor for harvesting.
+        string _seed  = "Azalea Seed";
+        string _plant = "Azalea"; // Make sure plant ends up Mature or not. 
         
         // Note: You may need to update the Amount of labor needed for Gathering & Harvesting.
         string _gather  = "Gathering: Spend 1 Labor to gather materials.";
@@ -37,13 +37,16 @@ namespace ArcheAgeFarmMonkey
         string _gpsfile = "\\plugins\\FarmMonkey\\Path\\file.db3";
         
         // Set to true if you have a gps file for moveing to and from the safe.
-        private bool _enablegps = false; 
+        private bool _enablegps = false;
+        // Set to true if your gps file has paths from the Nui ( generally not necessary in safe zone farming )
+        private bool _deathcheck = false;
         
         // END Universal Config 
         // ( Do Not Edit anything past this line unless you are confident you know what your doing )
         
         // Universal Application Information
         private Gps gps;
+        Random random = new Random();
         
         //Call on plugin start
         public void PluginRun()
@@ -53,9 +56,29 @@ namespace ArcheAgeFarmMonkey
             
             while (true) {
                 if (gameState == GameState.Ingame){
-                    Log(Time() + "We are in game and ready to Farm");
+                    Log(Time() + "Time to Farm");
+                    
+                    // Death Check ( Am i really dead ? )
+                    if ( _enablegps == true && _deathcheck == true && !me.isAlive()){ 
+                        Log("We have died, there must be a reason for this check into that would you");
+                        
+                        // Res timer is Buggy due to continued deaths raises the time
+                        Log("Waiting 18 Seconds to resurection");
+                        Thread.Sleep(18000);
+                        
+                        ResToRespoint();
+                        Log("Time to Ressurect");
+                        while (!me.isAlive()){
+                            Log("Waiting 8 seconds to try again");
+                            Thread.Sleep(8000);
+                            ResToRespoint();
+                         }
+                        DeathRun();
+                        
+                    }  
+                    
                     // Lets get back to the Farms
-                    if ( _enablegps == true){ MoveToFarm(); }
+                    if ( _enablegps == true && me.isAlive()){ MoveToFarm(); }
                     
                     // Time to Harvest plants
                     Harvesting();
@@ -67,9 +90,8 @@ namespace ArcheAgeFarmMonkey
                     
                     
                     //  Temporary Sleep to prevent to many checks
-                    Random random = new Random();
-                    var mseconds  = random.Next(240, 300) * 1000;
-                    var seconds   = mseconds / 1000;
+                    var mseconds = random.Next(240, 300) * 1000;
+                    var seconds  = mseconds / 1000;
                     Log(Time() +  "Waiting " + seconds.ToString() + " seconds to check seeds");
                     Thread.Sleep(mseconds);
 
@@ -77,6 +99,7 @@ namespace ArcheAgeFarmMonkey
             }
         }
 
+        // Moving Routines
         public void MoveToFarm()        
         {         
            gps = new Gps(this); 
@@ -90,7 +113,20 @@ namespace ArcheAgeFarmMonkey
            gps.LoadDataBase(Application.StartupPath + _gpsfile); 
            gps.GpsMove("Safe");                
          }
-        
+       
+       public void DeathRun()
+       {
+           //var dseconds  = random.Next(6000, 18000);
+           //var dmseconds = dseconds / 1000;
+           //Log(Time() + dmseconds + " seconds till resurection");
+           //Thread.Sleep(dseconds);
+           gps = new Gps(this); 
+           gps.LoadDataBase(Application.StartupPath + _gpsfile);
+            Log("Lets Get Moving");
+           gps.GpsMove("Safe");                
+       }
+       
+       // Farming Routines
         public void Harvesting()
         {
             var _labor = me.laborPoints;
@@ -120,7 +156,8 @@ namespace ArcheAgeFarmMonkey
                 }
         }
         
-        public string Time() //- Get Time
+        // Utility Stuff
+        public string Time()
         {
             string A = DateTime.Now.ToString("[hh:mm:ss] ");
             return A;
