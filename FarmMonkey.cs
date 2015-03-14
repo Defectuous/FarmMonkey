@@ -1,4 +1,4 @@
-       using System;
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Threading;
@@ -116,10 +116,6 @@ namespace ArcheAgeFarmMonkey
        
        public void DeathRun()
        {
-           //var dseconds  = random.Next(6000, 18000);
-           //var dmseconds = dseconds / 1000;
-           //Log(Time() + dmseconds + " seconds till resurection");
-           //Thread.Sleep(dseconds);
            gps = new Gps(this); 
            gps.LoadDataBase(Application.StartupPath + _gpsfile);
             Log("Lets Get Moving");
