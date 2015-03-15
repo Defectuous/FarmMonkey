@@ -81,14 +81,14 @@ namespace ArcheAgeFarmMonkey
                     }  
                     // Lets get back to the Farms
                     if ( _enablegps == true && me.isAlive()){ MoveToFarm(); }
-                    
                     // Time to Harvest plants
                     if (_enableharvest == true){ Harvesting(); }
                     // Lets fill that field with seeds
                     if (_enableplant == true){ Planting(); }
-                    
+                    // Check For last plant timer
                     // Time to head back to the safe spot
                     if ( _enablegps == true){ MoveToSafe(); }
+
                     
                     //  Temporary Sleep to prevent to many checks
                     var mseconds = random.Next(240, 300) * 1000;
