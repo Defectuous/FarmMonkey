@@ -18,7 +18,7 @@ namespace ArcheAgeFarmMonkey
         public static string GetPluginAuthor()
         { return "Defectuous"; }
         public static string GetPluginVersion()
-        { return "1.1.9.4"; }
+        { return "1.1.9.2"; }
         public static string GetPluginDescription()
         { return "FarmMonkey: Continuous Multi Farm Harvest & Planting Plugin"; }
         
@@ -26,19 +26,22 @@ namespace ArcheAgeFarmMonkey
         
         uint[] _farms = { 12345, 54321 }; // Gather Farm ID's wtih scarecrow { 12345, 54321 }
         int _minlabor = 20;  // Minimum Labor for harvesting.
-        string _seed  = "Azalea Seed";
-        string _plant = "Azalea"; // Make sure plant ends up Mature or not. 
+        string _seed  = "Lavender Seed";
+        string _plant = "Lavender"; // Make sure plant ends up Mature or not. 
         
         // Note: You may need to update the Amount of labor needed for Gathering & Harvesting.
         string _gather  = "Gathering: Spend 1 Labor to gather materials.";
         string _harvest = "Farming: Spend 1 Labor to harvest crops.";
+        
+        // to enable only Planting or Harvesting. Both enabled by default.
+        private bool _enableharvest = true;
+        private bool _enableplant = true;
         
         // This gps file needs 2 points " Safe " & " Farm "
         string _gpsfile = "\\plugins\\FarmMonkey\\Path\\file.db3";
         
         // Set to true if you have a gps file for moveing to and from the safe.
         private bool _enablegps = false;
-        // Set to true if your gps file has paths from the Nui ( generally not necessary in safe zone farming )
         private bool _deathcheck = false;
         
         // END Universal Config 
@@ -76,18 +79,16 @@ namespace ArcheAgeFarmMonkey
                         DeathRun();
                         
                     }  
-                    
                     // Lets get back to the Farms
                     if ( _enablegps == true && me.isAlive()){ MoveToFarm(); }
                     
                     // Time to Harvest plants
-                    Harvesting();
+                    if (_enableharvest == true){ Harvesting(); }
                     // Lets fill that field with seeds
-                    Planting();
+                    if (_enableplant == true){ Planting(); }
                     
                     // Time to head back to the safe spot
                     if ( _enablegps == true){ MoveToSafe(); }
-                    
                     
                     //  Temporary Sleep to prevent to many checks
                     var mseconds = random.Next(240, 300) * 1000;
@@ -118,7 +119,7 @@ namespace ArcheAgeFarmMonkey
        {
            gps = new Gps(this); 
            gps.LoadDataBase(Application.StartupPath + _gpsfile);
-            Log("Lets Get Moving");
+           Log("Lets Get Moving");
            gps.GpsMove("Safe");                
        }
        
