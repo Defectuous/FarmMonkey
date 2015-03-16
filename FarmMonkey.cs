@@ -26,7 +26,7 @@ namespace ArcheAgeFarmMonkey
         
         string _seed  = "Azalea Seed"; // Seeds to plant
         string _plant = "Azalea"; // Make sure plant ends up Mature or just the plant name
-        uint[] _farms = { 12345, 54321 }; // Gather Farm ID's wtih scarecrow { 12345, 54321 }
+        uint[] _farms = { 15352, 15346 }; // Gather Farm ID's wtih scarecrow { 12345, 54321 }
         
         // Tweak as necessary 
         int _mingold    = 50000;   // 5g00s00c
@@ -65,7 +65,7 @@ namespace ArcheAgeFarmMonkey
         public void PluginRun()
         {
             ClearLogs();
-            Log(Time() + "FarmMonkey Version: " + GetPluginVersion() " Plugin Started");
+            Log(Time() + "FarmMonkey: Plugin Started");
             
             while (true) {
                 if (gameState == GameState.Ingame){
@@ -90,14 +90,14 @@ namespace ArcheAgeFarmMonkey
                         DeathRun();
                     }  
                     // Lets get back to the Farms
-                    if ( _enablegps == true && me.isAlive()){ MoveToFarm(); }
+                    if (_enablegps == true && me.isAlive()){ MoveToFarm(); }
                     
                     // Time to Harvest plants
                     if (_enableharvest == true){ Harvesting(); }
                     // Mail Function
                     
                     // Buy Seeds before planting
-                    if (_enablebuyseed == true ){ BuySeeds(); }
+                    if (_enablebuyseed == true && _enablegps == true){ BuySeeds(); }
                     
                     // Lets fill that field with seeds
                     if (_enableplant == true){ Planting(); }
@@ -185,7 +185,7 @@ namespace ArcheAgeFarmMonkey
                         gps.GpsMove("Seed");
                         
                         Log(Time() + "Seed Stock: " + seedcount);
-                        if ( seedcount <= _minseed ){
+                        if ( seedcount <= _minseed && seedcount >= _maxseed){
                             BuyItems(_seed, _buyseedamt);
                             var seedcount2 = itemCount(_seed);
                             Log("Updated Seed Cound: " + seedcount2);
