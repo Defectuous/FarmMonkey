@@ -62,7 +62,7 @@ namespace ArcheAgeFarmMonkey
                     Log(Time() + "Time to Farm");
                     
                     // Death Check ( Am i really dead ? )
-                    if ( _enablegps == true && _deathcheck == true && !me.isAlive()){ 
+                    if (_enablegps == true && _deathcheck == true && !me.isAlive()){ 
                         Log("We have died, there must be a reason for this check into that would you");
                         
                         // Res timer is Buggy due to continued deaths raises the time
@@ -80,14 +80,16 @@ namespace ArcheAgeFarmMonkey
                         
                     }  
                     // Lets get back to the Farms
-                    if ( _enablegps == true && me.isAlive()){ MoveToFarm(); }
+                    if (_enablegps == true && me.isAlive()){ MoveToFarm(); }
                     // Time to Harvest plants
                     if (_enableharvest == true){ Harvesting(); }
                     // Lets fill that field with seeds
                     if (_enableplant == true){ Planting(); }
                     // Check For last plant timer
                     // Time to head back to the safe spot
-                    if ( _enablegps == true){ MoveToSafe(); }
+                    if (_enablegps == true){ MoveToSafe(); }
+                    //PlantTimers();
+                        
 
                     
                     //  Temporary Sleep to prevent to many checks
@@ -154,6 +156,8 @@ namespace ArcheAgeFarmMonkey
         }
         
         // Utility Stuff
+        public string Far
+        
         public string Time()
         {
             string A = DateTime.Now.ToString("[hh:mm:ss] ");
