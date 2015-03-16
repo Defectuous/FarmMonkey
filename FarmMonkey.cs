@@ -43,7 +43,7 @@ namespace ArcheAgeFarmMonkey
         // to enable only Planting or Harvesting. Both enabled by default.
         private bool _enableharvest = true;
         private bool _enableplant = true;
-        private bool _enablebuyseed = true; // To buy Seeds you need a gps point called Seed
+        private bool _enablebuyseed = false; // To buy Seeds you need a gps point called Seed
         
         // This gps file needs the following points Safe, Farm, Seed, Mail
         string _gpsfile = "\\plugins\\FarmMonkey\\Path\\file.db3";
