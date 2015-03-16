@@ -26,7 +26,7 @@ namespace ArcheAgeFarmMonkey
         
         string _seed  = "Azalea Seed"; // Seeds to plant
         string _plant = "Azalea"; // Make sure plant ends up Mature or just the plant name
-        uint[] _farms = { 15352, 15346 }; // Gather Farm ID's wtih scarecrow { 12345, 54321 }
+        uint[] _farms = { 12345, 54321 }; // Gather Farm ID's wtih scarecrow { 12345, 54321 }
         
         // Tweak as necessary 
         int _mingold    = 50000;   // 5g00s00c
