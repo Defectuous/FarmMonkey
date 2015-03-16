@@ -164,7 +164,6 @@ namespace ArcheAgeFarmMonkey
                         Log(Time() + "Seed Count: " + seedcount + _seed);
                         Log(Time() +  "Planting" + _seed + "(s) on FarmID: " + farm);
                         PlantItemsAtFarm(_seed, farm);
-                        MoveToFarm();
                     }
                 }
         }
