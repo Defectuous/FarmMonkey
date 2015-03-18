@@ -26,7 +26,7 @@ namespace ArcheAgeFarmMonkey
         
         string _seed  = "Sunflower Seed"; // Seeds to plant
         string _plant = "Sunflower"; // Make sure plant ends up Mature or just the plant name
-        uint[] _farms = { 12127, 12066 }; // Gather Farm ID's wtih scarecrow { 12345, 54321 }
+        uint[] _farms = { 12345, 54321 }; // Gather Farm ID's wtih scarecrow { 12345, 54321 }
         
         // Tweak as necessary 
         int _minlabor = 200;  // Minimum Labor for harvesting.
