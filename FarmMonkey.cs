@@ -47,7 +47,8 @@ namespace ArcheAgeFarmMonkey
         
         // Rest Section
         private bool _enablerest = false; // Enable to sit in chair or lay in bed
-        string _restitem = "Chair"; // Name of Chair or bed
+        string _restitem = "Chair"; // Name of Chair or bed 
+        string _resttext = "Sit in a chair or lay on a bed.";
         
         // This gps file needs the following points Safe, Farm, Seed, Mail
         string _gpsfile = "\\plugins\\FarmMonkey\\Path\\file.db3";
@@ -200,7 +201,7 @@ namespace ArcheAgeFarmMonkey
                             var seedcount2 = itemCount(_seed);
                             Log(Time() + "Updated Seed Cound: " + seedcount2);
                             
-                            var mseconds = random.Next(50, 300);
+                            var mseconds = random.Next(3000, 5000);
                             var seconds  = mseconds / 1000;
                             Log(Time() +  "Checking seed stock");
                             Thread.Sleep(mseconds);
@@ -216,9 +217,9 @@ namespace ArcheAgeFarmMonkey
 
         public void Relax()
         {
-            DoodadObject _restitem;
-            _restitem = getNearestDoodad(_RestingSpot);
-            UseDoodadSkill(_RestText, _restitem, true, 0);
+            DoodadObject restspot;
+            restspot = getNearestDoodad(_restitem);
+            UseDoodadSkill(_resttext, restspot, true, 0);
         }
             
         public string Time()
