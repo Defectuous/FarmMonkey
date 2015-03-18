@@ -18,24 +18,19 @@ namespace ArcheAgeFarmMonkey
         public static string GetPluginAuthor()
         { return "Defectuous"; }
         public static string GetPluginVersion()
-        { return "1.1.9.7"; }
+        { return "1.1.10.0"; }
         public static string GetPluginDescription()
         { return "FarmMonkey: Continuous Multi Farm Harvest & Planting Plugin"; }
         
         // START Universal Config
         
-        string _seed  = "Azalea Seed"; // Seeds to plant
-        string _plant = "Azalea"; // Make sure plant ends up Mature or just the plant name
-        uint[] _farms = { 15352, 15346 }; // Gather Farm ID's wtih scarecrow { 12345, 54321 }
+        string _seed  = "Sunflower Seed"; // Seeds to plant
+        string _plant = "Sunflower"; // Make sure plant ends up Mature or just the plant name
+        uint[] _farms = { 12127, 12066 }; // Gather Farm ID's wtih scarecrow { 12345, 54321 }
         
         // Tweak as necessary 
-        int _mingold    = 50000;   // 5g00s00c
-        int _minlabor   = 200;  // Minimum Labor for harvesting.
-        int _minseed    = 50; // Minimum Seed Count before purchasing more
-        int _maxseed    = 1000; // Maximum number of seeds to have at a time
-        
-        
-        
+        int _minlabor = 200;  // Minimum Labor for harvesting.
+
         // Note: You may need to update the Amount of labor needed for Gathering & Harvesting.
         string _gather  = "Gathering: Spend 1 Labor to gather materials.";
         string _harvest = "Farming: Spend 1 Labor to harvest crops.";
@@ -43,7 +38,16 @@ namespace ArcheAgeFarmMonkey
         // to enable only Planting or Harvesting. Both enabled by default.
         private bool _enableharvest = true;
         private bool _enableplant = true;
+        
+        // Buy Section
         private bool _enablebuyseed = false; // To buy Seeds you need a gps point called Seed
+        int _mingold  = 50000;   // 50000 = 5Gold 00Silver 00Copper
+        int _minseed  = 50; // Minimum Seed Count before purchasing more
+        int _maxseed  = 1000; // Maximum number of seeds to have at a time        
+        
+        // Rest Section
+        private bool _enablerest = false; // Enable to sit in chair or lay in bed
+        string _restitem = "Chair"; // Name of Chair or bed
         
         // This gps file needs the following points Safe, Farm, Seed, Mail
         string _gpsfile = "\\plugins\\FarmMonkey\\Path\\file.db3";
@@ -71,29 +75,30 @@ namespace ArcheAgeFarmMonkey
                 if (gameState == GameState.Ingame){
                     // Start Threads here ( farming & movement )
                     Log(Time() + "Time to Farm");
-                    
+
                     // Death Check ( Am i really dead ? )
                     if ( _enablegps == true && _deathcheck == true && !me.isAlive()){ 
-                        Log("We have died, there must be a reason for this check into that would you");
+                        Log(Time() + "We have died, there must be a reason for this check into that would you");
                         
                         // Res timer is Buggy due to continued deaths raises the time
-                        Log("Waiting 18 Seconds to resurection");
+                        Log(Time() + "Waiting 18 Seconds to resurection");
                         Thread.Sleep(18000);
                         
                         ResToRespoint();
-                        Log("Time to Ressurect");
+                        Log(Time() +  "Time to Ressurect");
                         while (!me.isAlive()){
-                            Log("Waiting 8 seconds to try again");
+                            Log(Time() +  "Waiting 8 seconds to try again");
                             Thread.Sleep(8000);
                             ResToRespoint();
                          }
-                        DeathRun();
+                        MoveToSafe();
                     }  
                     // Lets get back to the Farms
-                    if (_enablegps == true && me.isAlive()){ MoveToFarm(); }
+                    if (_enablegps == true && me.isAlive()){ MoveToFarm();}
                     
                     // Time to Harvest plants
                     if (_enableharvest == true){ Harvesting(); }
+                    
                     // Mail Function
                     
                     // Buy Seeds before planting
@@ -109,6 +114,7 @@ namespace ArcheAgeFarmMonkey
                     var mseconds = random.Next(240, 300) * 1000;
                     var seconds  = mseconds / 1000;
                     Log(Time() +  "Waiting " + seconds.ToString() + " seconds to check seeds");
+                    Stock();
                     Thread.Sleep(mseconds);
 
                 }
@@ -118,25 +124,26 @@ namespace ArcheAgeFarmMonkey
         // Moving Routines
         public void MoveToFarm()        
         {         
-           gps = new Gps(this); 
+           gps = new Gps(this);
+           Log(Time() + "Loading GPS File"); 
            gps.LoadDataBase(Application.StartupPath + _gpsfile); 
+           Log(Time() +  "Moving to Farm");
            gps.GpsMove("Farm");                
          }
         
        public void MoveToSafe()        
         {         
            gps = new Gps(this); 
+           Log(Time() + "Loading GPS File"); 
            gps.LoadDataBase(Application.StartupPath + _gpsfile); 
-           gps.GpsMove("Safe");                
-         }
-       
-       public void DeathRun()
-       {
-           gps = new Gps(this); 
-           gps.LoadDataBase(Application.StartupPath + _gpsfile);
-           Log("Lets Get Moving");
-           gps.GpsMove("Safe");                
-       }
+           Log(Time() + "Moving to Safe");
+           gps.GpsMove("Safe");
+           Log(Time() +  "Safe Spot has been Reached");           
+           if (_enablerest == true){ 
+                Relax();
+                Log(Time() +  "Rest Time");
+                }
+        }
        
        // Farming Routines
         public void Harvesting()
@@ -149,21 +156,22 @@ namespace ArcheAgeFarmMonkey
                     CollectItemsAtFarm(_plant, _gather, farm);
                     CollectItemsAtFarm(_plant, _harvest, farm);
                     } 
-            }
+                }else{ Log(Time() +"Your Labor is under " + _minlabor); }
         }
 
         public void Planting()
         {
             var seedcount = itemCount(_seed);
             if ( seedcount == 0){
-                Log(Time() + "Seed Count:" + seedcount + _seed);
                 Log(Time() + "You have no seeds!");
                 } else{
                     foreach (uint farm in _farms)
                     {
-                        Log(Time() + "Seed Count: " + seedcount + _seed);
-                        Log(Time() +  "Planting" + _seed + "(s) on FarmID: " + farm);
+                        var seedcount2 = itemCount(_seed);
+                        Log(Time() + _seed + " Count: " + seedcount2);
+                        Log(Time() +  "Planting " + _seed + "(s) on FarmID: " + farm);
                         PlantItemsAtFarm(_seed, farm);
+                        MoveToFarm();
                     }
                 }
         }
@@ -171,43 +179,67 @@ namespace ArcheAgeFarmMonkey
         // Utility Stuff
         public void BuySeeds()
         {
-           while (true){    
-                var _mygold = me.goldCount;
+            while (true){
+                
+                var _mygold   = me.goldCount;
                 var seedcount = itemCount(_seed);
                 if (_mygold <= _mingold){ 
                     Log(Time() + "Unable to Purchase due to lack of funds"); 
+                    Log(Time() + "######################################");
                     break;
                     } else {
+                        Log(Time() + "######################################");
+                        Log(Time() + "Lets go buy seeds");
                         gps = new Gps(this); 
                         gps.LoadDataBase(Application.StartupPath + _gpsfile); 
-                        Log(Time() + "Lets go buy seeds");
                         gps.GpsMove("Seed");
-                        
+                        Log(Time() + "######################################");
                         Log(Time() + "Seed Stock: " + seedcount);
-                        if ( seedcount <= _minseed && seedcount >= _maxseed){
+                        if ( seedcount <= _minseed && seedcount <= _maxseed){
                             BuyItems(_seed, _buyseedamt);
                             var seedcount2 = itemCount(_seed);
-                            Log("Updated Seed Cound: " + seedcount2);
+                            Log(Time() + "Updated Seed Cound: " + seedcount2);
                             
-                        var mseconds = random.Next(50, 300);
-                        var seconds  = mseconds / 1000;
-                        Log(Time() +  "Waiting " + seconds.ToString() + " seconds to check seeds");
-                        Thread.Sleep(mseconds);
+                            var mseconds = random.Next(50, 300);
+                            var seconds  = mseconds / 1000;
+                            Log(Time() +  "Checking seed stock");
+                            Thread.Sleep(mseconds);
                         
                         } else {
                             Log(Time() + "Seed Purchase Completed");
+                            Log(Time() + "######################################");
                             break;
-                        }
+                    }
                 }
             }
         }
-        
+
+        public void Relax()
+        {
+            DoodadObject _restitem;
+            _restitem = getNearestDoodad(_RestingSpot);
+            UseDoodadSkill(_RestText, _restitem, true, 0);
+        }
+            
         public string Time()
         {
             string A = DateTime.Now.ToString("[hh:mm:ss] ");
             return A;
         }
+    
+        public void Stock()
+            {
+            var seedcount  = itemCount(_seed);
+            var plantcount = itemCount(_plant);
         
+            Log(Time() + "################################");
+            Log(Time() + "# Farm Markey Inventory Update #");
+            Log(Time() + "################################");
+            Log(Time() + _seed + " Count: " + seedcount);
+            Log(Time() + _plant + " Count: " + plantcount);
+            Log(Time() + "################################");
+        }    
+            
         //Call on plugin stop
         public void PluginStop()
         {
