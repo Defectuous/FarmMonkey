@@ -18,15 +18,15 @@ namespace ArcheAgeFarmMonkey
         public static string GetPluginAuthor()
         { return "Defectuous"; }
         public static string GetPluginVersion()
-        { return "1.1.10.0"; }
+        { return "1.1.10.3"; }
         public static string GetPluginDescription()
         { return "FarmMonkey: Continuous Multi Farm Harvest & Planting Plugin"; }
         
         // START Universal Config
         
-        string _seed  = "Sunflower Seed"; // Seeds to plant
-        string _plant = "Sunflower"; // Make sure plant ends up Mature or just the plant name
-        uint[] _farms = { 12345, 54321 }; // Gather Farm ID's wtih scarecrow { 12345, 54321 }
+        string _seed  = "Barley Seed"; // Seeds to plant
+        string _plant = "Barley"; // Make sure plant ends up Mature or just the plant name
+        uint[] _farms = { 13851, 13847 }; // Gather Farm ID's wtih scarecrow { 12345, 54321 }
         
         // Tweak as necessary 
         int _minlabor = 200;  // Minimum Labor for harvesting.
@@ -44,6 +44,10 @@ namespace ArcheAgeFarmMonkey
         int _mingold  = 50000;   // 50000 = 5Gold 00Silver 00Copper
         int _minseed  = 50; // Minimum Seed Count before purchasing more
         int _maxseed  = 1000; // Maximum number of seeds to have at a time        
+        
+        
+        // Enable Doors
+        private bool _enabledoor = false; // Set to true if youe safe Zone requires you to go through a door & you have door0 & door1 set in the gps file
         
         // Rest Section
         private bool _enablerest = false; // Enable to sit in chair or lay in bed
@@ -128,22 +132,67 @@ namespace ArcheAgeFarmMonkey
            gps = new Gps(this);
            Log(Time() + "Loading GPS File"); 
            gps.LoadDataBase(Application.StartupPath + _gpsfile); 
+           //
+           if (_enabledoor == true){
+            Log(Time() + "We need to Open / Close the Door");
+            gps.GpsMove("Door1");
+            // Time to Open the Door
+            DoodadObject doors = getNearestDoodad("Door");
+            if (doors != null && ComeTo(doors, 2))
+                {
+                    if (doors.phaseId == 11163)
+                        {
+                            UseDoodadSkill(16828, doors);
+                            Thread.Sleep(1000);
+                            gps.GpsMove("Door0");
+                        } else { gps.GpsMove("Door0"); }
+                        // Time to Close the Door
+                        if (doors.phaseId == 11165)
+                    {
+                        UseDoodadSkill(16828, doors);
+                        Thread.Sleep(1000);
+                    }
+                }
+        }
+           //
            Log(Time() +  "Moving to Farm");
            gps.GpsMove("Farm");                
-         }
+        }
         
-       public void MoveToSafe()        
+        public void MoveToSafe()        
         {         
-           gps = new Gps(this); 
-           Log(Time() + "Loading GPS File"); 
-           gps.LoadDataBase(Application.StartupPath + _gpsfile); 
-           Log(Time() + "Moving to Safe");
-           gps.GpsMove("Safe");
-           Log(Time() +  "Safe Spot has been Reached");           
-           if (_enablerest == true){ 
+            gps = new Gps(this); 
+            Log(Time() + "Loading GPS File"); 
+            gps.LoadDataBase(Application.StartupPath + _gpsfile);
+            if (_enabledoor == true){
+            Log(Time() + "We need to Open / Close the Door");
+            gps.GpsMove("Door0");
+            // Time to Open the Door
+            DoodadObject doors = getNearestDoodad("Door");
+            if (doors != null && ComeTo(doors, 2))
+                {
+                    if (doors.phaseId == 11163)
+                        {
+                            UseDoodadSkill(16828, doors);
+                            Thread.Sleep(1000);
+                            gps.GpsMove("Door1");
+                        } else { gps.GpsMove("Door1"); }
+                    // Time to Close the Door
+                    if (doors.phaseId == 11165)
+                    {
+                        UseDoodadSkill(16828, doors);
+                        Thread.Sleep(1000);
+                    }
+            }
+            //
+            Log(Time() + "Moving to Safe");
+            gps.GpsMove("Safe");
+            Log(Time() +  "Safe Spot has been Reached");           
+            if (_enablerest == true){ 
                 Relax();
                 Log(Time() +  "Rest Time");
-                }
+            }
+        }
         }
        
        // Farming Routines
@@ -185,8 +234,8 @@ namespace ArcheAgeFarmMonkey
                 var _mygold   = me.goldCount;
                 var seedcount = itemCount(_seed);
                 if (_mygold <= _mingold){ 
-                    Log(Time() + "Unable to Purchase due to lack of funds"); 
                     Log(Time() + "######################################");
+                    Log(Time() + "Unable to Purchase due to lack of funds"); 
                     break;
                     } else {
                         Log(Time() + "######################################");
@@ -194,14 +243,13 @@ namespace ArcheAgeFarmMonkey
                         gps = new Gps(this); 
                         gps.LoadDataBase(Application.StartupPath + _gpsfile); 
                         gps.GpsMove("Seed");
-                        Log(Time() + "######################################");
                         Log(Time() + "Seed Stock: " + seedcount);
                         if ( seedcount <= _minseed && seedcount <= _maxseed){
                             BuyItems(_seed, _buyseedamt);
                             var seedcount2 = itemCount(_seed);
                             Log(Time() + "Updated Seed Cound: " + seedcount2);
                             
-                            var mseconds = random.Next(3000, 5000);
+                            var mseconds = random.Next(2000, 5000);
                             var seconds  = mseconds / 1000;
                             Log(Time() +  "Checking seed stock");
                             Thread.Sleep(mseconds);
@@ -236,8 +284,10 @@ namespace ArcheAgeFarmMonkey
             Log(Time() + "################################");
             Log(Time() + "# Farm Markey Inventory Update #");
             Log(Time() + "################################");
+            Log(Time());
             Log(Time() + _seed + " Count: " + seedcount);
             Log(Time() + _plant + " Count: " + plantcount);
+            Log(Time());
             Log(Time() + "################################");
         }    
             
