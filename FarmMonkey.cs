@@ -18,26 +18,27 @@ namespace ArcheAgeFarmMonkey
         public static string GetPluginAuthor()
         { return "Defectuous"; }
         public static string GetPluginVersion()
-        { return "1.1.10.3"; }
+        { return "1.1.10.5"; }
         public static string GetPluginDescription()
         { return "FarmMonkey: Continuous Multi Farm Harvest & Planting Plugin"; }
         
         // START Universal Config
         
-        string _seed  = "Barley Seed"; // Seeds to plant
-        string _plant = "Barley"; // Make sure plant ends up Mature or just the plant name
-        uint[] _farms = { 13851, 13847 }; // Gather Farm ID's wtih scarecrow { 12345, 54321 }
+        string _seed  = "Quinoa Seed"; // Seeds to plant
+        string _plant = "Quinoa"; // Make sure plant ends up Mature or just the plant name
+        uint[] _farms = { 4106 }; // Gather Farm ID's wtih scarecrow { 12345, 54321 }     3589
         
         // Tweak as necessary 
         int _minlabor = 200;  // Minimum Labor for harvesting.
 
         // Note: You may need to update the Amount of labor needed for Gathering & Harvesting.
-        string _gather  = "Gathering: Spend 1 Labor to gather materials.";
-        string _harvest = "Farming: Spend 1 Labor to harvest crops.";
+        string _gather  = "Gathering: Spend up to 3 Labor to gather materials.";
+        string _harvest = "Farming: Spend up to 3 Labor to harvest crops.";
         
         // to enable only Planting or Harvesting. Both enabled by default.
         private bool _enableharvest = true;
-        private bool _enableplant = true;
+        private bool _enableplant = false;
+        //private bool _enablerotate = false; // Used to rotate multiple plant types
         
         // Buy Section
         private bool _enablebuyseed = false; // To buy Seeds you need a gps point called Seed
@@ -53,6 +54,14 @@ namespace ArcheAgeFarmMonkey
         private bool _enablerest = false; // Enable to sit in chair or lay in bed
         string _restitem = "Chair"; // Name of Chair or bed 
         string _resttext = "Sit in a chair or lay on a bed.";
+        
+        // Mail Functions
+        private bool _enablemail = false; // Enable to send mail
+        public bool _fastmail = true; // To send with fast mail rather then slow
+        string _mailto   = "Null"; // Name to who your mail will go to
+        string _mailsub  = "For Processing"; // Subject of that mail
+        string _mailtext = "From Farming"; // Mail Body Required
+        int _amtmail     = 1000; // When your inventory reaches this amount it will mail at the end of the harvest.
         
         // This gps file needs the following points Safe, Farm, Seed, Mail
         string _gpsfile = "\\plugins\\FarmMonkey\\Path\\file.db3";
@@ -99,27 +108,28 @@ namespace ArcheAgeFarmMonkey
                         MoveToSafe();
                     }  
                     // Lets get back to the Farms
-                    if (_enablegps == true && me.isAlive()){ MoveToFarm();}
+                    if (_enablegps == true && me.isAlive()){ MoveToFarm(); }else{Log(Time() + "GPS DISABLED Farm"); }
                     
                     // Time to Harvest plants
-                    if (_enableharvest == true){ Harvesting(); }
+                    if (_enableharvest == true){ Harvesting(); }else{Log(Time() + "_enableharvest Set to False"); }
                     
                     // Mail Function
+                    if (_enablemail == true && _enablegps == true){ Mailer(); }else{Log(Time() + "Mail Disabled"); }
                     
                     // Buy Seeds before planting
-                    if (_enablebuyseed == true && _enablegps == true){ BuySeeds(); }
+                    if (_enablebuyseed == true && _enablegps == true){ BuySeeds(); }else{Log(Time() + "_enablebuyseed Set to False"); }
                     
                     // Lets fill that field with seeds
-                    if (_enableplant == true){ Planting(); }
+                    if (_enableplant == true){ Planting(); }else{Log(Time() + "_enableplant Set to False"); }
                     
                     // Time to head back to the safe spot
-                    if ( _enablegps == true){ MoveToSafe(); }
+                    if ( _enablegps == true){ MoveToSafe(); }else{Log(Time() + "GPS DISABLED Safe"); }
+                    Stock();
                     
                     //  Temporary Sleep to prevent to many checks
                     var mseconds = random.Next(240, 300) * 1000;
                     var seconds  = mseconds / 1000;
                     Log(Time() +  "Waiting " + seconds.ToString() + " seconds to check seeds");
-                    Stock();
                     Thread.Sleep(mseconds);
 
                 }
@@ -192,7 +202,7 @@ namespace ArcheAgeFarmMonkey
                 Relax();
                 Log(Time() +  "Rest Time");
             }
-        }
+            }else{Log(Time() + "_enabledoor Set to False");}  
         }
        
        // Farming Routines
@@ -262,7 +272,38 @@ namespace ArcheAgeFarmMonkey
                 }
             }
         }
-
+        
+        public void Mailer()
+        {
+            Log(Time() + "Starting the Mail Process");
+            Log(Time() + "######################################");
+            gps = new Gps(this); 
+            gps.LoadDataBase(Application.StartupPath + _gpsfile); 
+            Log(Time() + "Moving to Mailbox");
+            gps.GpsMove("Mail");
+            List<Item> mailitems = new List<Item>();
+                {
+                    List<Item> Inventory = getInvItems(_plant);
+                    foreach (Item item in Inventory)
+                    {
+                        if (mailitems.Count <= 8)
+                        break;
+                        mailitems.Add(item);
+                        
+                    }
+                }
+                var mailcount = itemCount(_plant);
+            
+            if (mailcount >= _amtmail){
+                    Log(Time() + "Sending " + _plant + " to " + _mailto);
+                    SendMail( _mailto, _mailsub, _mailtext, _fastmail, 0, mailitems);
+                    Log(Time() + "######################################");
+                }else{
+                    Log(Time() + "Mail Processes Finished");
+                    Log(Time() + "######################################");
+                }
+        }
+            
         public void Relax()
         {
             DoodadObject restspot;
