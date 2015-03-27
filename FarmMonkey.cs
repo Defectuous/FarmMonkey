@@ -18,7 +18,7 @@ namespace ArcheAgeFarmMonkey
         public static string GetPluginAuthor()
         { return "Defectuous"; }
         public static string GetPluginVersion()
-        { return "1.1.10.5"; }
+        { return "1.1.10.7"; }
         public static string GetPluginDescription()
         { return "FarmMonkey: Continuous Multi Farm Harvest & Planting Plugin"; }
         
@@ -27,6 +27,7 @@ namespace ArcheAgeFarmMonkey
         string _seed  = "Quinoa Seed"; // Seeds to plant
         string _plant = "Quinoa"; // Make sure plant ends up Mature or just the plant name
         uint[] _farms = { 4106 }; // Gather Farm ID's wtih scarecrow { 12345, 54321 }     3589
+        int _growthtime = 28; // Growth Time of plants in minutes ( Hour = 60 Minutes, 24 hours = 1440 Minutes)
         
         // Tweak as necessary 
         int _minlabor = 200;  // Minimum Labor for harvesting.
@@ -55,7 +56,7 @@ namespace ArcheAgeFarmMonkey
         string _restitem = "Chair"; // Name of Chair or bed 
         string _resttext = "Sit in a chair or lay on a bed.";
         
-        // Mail Functions
+        // Mail Functions ( Will not send money )
         private bool _enablemail = false; // Enable to send mail
         public bool _fastmail = true; // To send with fast mail rather then slow
         string _mailto   = "Null"; // Name to who your mail will go to
@@ -66,14 +67,14 @@ namespace ArcheAgeFarmMonkey
         // This gps file needs the following points Safe, Farm, Seed, Mail
         string _gpsfile = "\\plugins\\FarmMonkey\\Path\\file.db3";
         
-        // Set to true if you have a gps file for moveing to and from the safe.
+        // Set to true if you have a gps file for moveing to and from the safe, mail, buy, farm.
         private bool _enablegps = false;
         private bool _deathcheck = false;
         
         // do not change this unless you plan to lower it
         int _buyseedamt = 100; // Do not raise this above 100
         // END Universal Config 
-        // (Do Not Edit anything past this line unless you are confident you know what your doing)
+        // ( Do Not Edit anything past this line unless you are confident you know what your doing !!! )
         
         // Universal Application Information
         private Gps gps;
@@ -114,7 +115,7 @@ namespace ArcheAgeFarmMonkey
                     if (_enableharvest == true){ Harvesting(); }else{Log(Time() + "_enableharvest Set to False"); }
                     
                     // Mail Function
-                    if (_enablemail == true && _enablegps == true){ Mailer(); }else{Log(Time() + "Mail Disabled"); }
+                    if (_enablemail == true && _enablegps == true){ Mailer(); }else{Log(Time() + "_enablemail Set to False"); }
                     
                     // Buy Seeds before planting
                     if (_enablebuyseed == true && _enablegps == true){ BuySeeds(); }else{Log(Time() + "_enablebuyseed Set to False"); }
@@ -124,14 +125,10 @@ namespace ArcheAgeFarmMonkey
                     
                     // Time to head back to the safe spot
                     if ( _enablegps == true){ MoveToSafe(); }else{Log(Time() + "GPS DISABLED Safe"); }
+                    
                     Stock();
                     
-                    //  Temporary Sleep to prevent to many checks
-                    var mseconds = random.Next(240, 300) * 1000;
-                    var seconds  = mseconds / 1000;
-                    Log(Time() +  "Waiting " + seconds.ToString() + " seconds to check seeds");
-                    Thread.Sleep(mseconds);
-
+                    Timer();
                 }
             }
         }
@@ -310,7 +307,20 @@ namespace ArcheAgeFarmMonkey
             restspot = getNearestDoodad(_restitem);
             UseDoodadSkill(_resttext, restspot, true, 0);
         }
+
+        public void Timer()
+        {
+            var seconds     = (_growthtime * 60);
+            var mseconds    = (seconds * 1000);
+            var addmseconds = random.Next(60,180) * 1000;
+            var finaltime   = (mseconds + addmseconds);
+            var logtime     = finaltime / 1000;
+            Log(Time() + "Farm Monkey Resting for " + logtime + " seconds");
+            Thread.Sleep(finaltime);
             
+            
+        }
+        
         public string Time()
         {
             string A = DateTime.Now.ToString("[hh:mm:ss] ");
