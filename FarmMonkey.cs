@@ -28,7 +28,7 @@ namespace ArcheAgeFarmMonkey
         string _plant    = "Chili Pepper"; // Make sure plant ends up Mature or just the plant name
         string _seedling = "Chili Pepper Seedling";
         uint[] _farms = { 12345 }; // Gather Farm ID's wtih scarecrow { 12345, 54321 }
-        private bool _oldtimer = false; // To enable the older timer rather than _growthtime
+        private bool _oldtimer = false; // To enable the older timer rather than plant timers
         
         // Tweak as necessary 
         int _minlabor = 200;  // Minimum Labor for harvesting.
