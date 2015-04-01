@@ -18,16 +18,17 @@ namespace ArcheAgeFarmMonkey
         public static string GetPluginAuthor()
         { return "Defectuous"; }
         public static string GetPluginVersion()
-        { return "1.1.10.7"; }
+        { return "1.1.10.10"; }
         public static string GetPluginDescription()
         { return "FarmMonkey: Continuous Multi Farm Harvest & Planting Plugin"; }
         
         // START Universal Config
         
-        string _seed  = "Quinoa Seed"; // Seeds to plant
-        string _plant = "Quinoa"; // Make sure plant ends up Mature or just the plant name
-        uint[] _farms = { 4106 }; // Gather Farm ID's wtih scarecrow { 12345, 54321 }     3589
-        int _growthtime = 28; // Growth Time of plants in minutes ( Hour = 60 Minutes, 24 hours = 1440 Minutes)
+        string _seed     = "Chili Pepper Seed"; // Seeds to plant
+        string _plant    = "Chili Pepper"; // Make sure plant ends up Mature or just the plant name
+        string _seedling = "Chili Pepper Seedling";
+        uint[] _farms = { 6979 }; // Gather Farm ID's wtih scarecrow { 12345, 54321 }
+        private bool _oldtimer = false; // To enable the older timer rather than _growthtime
         
         // Tweak as necessary 
         int _minlabor = 200;  // Minimum Labor for harvesting.
@@ -38,7 +39,7 @@ namespace ArcheAgeFarmMonkey
         
         // to enable only Planting or Harvesting. Both enabled by default.
         private bool _enableharvest = true;
-        private bool _enableplant = false;
+        private bool _enableplant = true;
         //private bool _enablerotate = false; // Used to rotate multiple plant types
         
         // Buy Section
@@ -310,15 +311,25 @@ namespace ArcheAgeFarmMonkey
 
         public void Timer()
         {
-            var seconds     = (_growthtime * 60);
-            var mseconds    = (seconds * 1000);
-            var addmseconds = random.Next(60,180) * 1000;
-            var finaltime   = (mseconds + addmseconds);
-            var logtime     = finaltime / 1000;
-            Log(Time() + "Farm Monkey Resting for " + logtime + " seconds");
-            Thread.Sleep(finaltime);
-            
-            
+            if ( _oldtimer == true ){
+                //  Temporary Sleep to prevent to many checks
+                var mseconds = random.Next(240, 300) * 1000;        
+                var seconds  = mseconds / 1000;     
+                Log(Time() +  "Waiting " + seconds.ToString() + " seconds to check seeds");     
+                Thread.Sleep(mseconds); 
+                }else{
+                    var plants      = getNearestDoodad(_seedling);    
+                    var seconds     = (plants.growthTime); // Gives time in seconds
+                    var minutes     = (seconds / 60); // Turns it into Minutes
+                    var mseconds    = (seconds * 1000); // Turns it into Miliseconds 
+                    var addmseconds = random.Next(60,180) * 1000; // Adding in some random time to look more human
+                    var finaltime   = (mseconds + addmseconds); // It's the Final Countdown ( Insert Music !!!!)
+                    var logtime     = (finaltime / 1000);
+                    
+                    Log(Time() + "Plant Growth Time: " + minutes + " Minutes");
+                    Log(Time() + "Resting " + (logtime / 60) + " Minutes");
+                    Thread.Sleep(finaltime);
+                }
         }
         
         public string Time()
