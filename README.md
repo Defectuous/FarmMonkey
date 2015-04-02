@@ -1,2 +1,2 @@
 # FarmMonkey
-Arche Buddy Farming Plugin
+FarmMonkey: Continuous Multi Farm Harvest & Planting Plugin
